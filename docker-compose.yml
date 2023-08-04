@@ -11,6 +11,9 @@ services:
       - MYSQL_USER=radius
       - MYSQL_PASSWORD=radiusdbpw
       - MYSQL_ROOT_PASSWORD=radiusrootdbpw
+
+    ports:
+      - '3306:3306'
     volumes:
       - "./data/mysql:/var/lib/mysql"
 
