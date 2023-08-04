@@ -3,7 +3,7 @@ version: "3"
 services:
 
   radius-mysql:
-    image: mariadb:10.6.14
+    image: mariadb:latest
     container_name: radius-mysql
     restart: unless-stopped
     environment:
@@ -59,7 +59,7 @@ services:
       - DEFAULT_FREERADIUS_SERVER=radius
       - MAIL_SMTPADDR=127.0.0.1
       - MAIL_PORT=25
-      - MAIL_FROM=root@daloradius.xdsl.by
+      - MAIL_FROM=
       - MAIL_AUTH=
 
     volumes:
