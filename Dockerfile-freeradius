@@ -27,7 +27,7 @@ RUN apt-get update \
 		ipcalc \
 		tzdata \
 		net-tools \
-		mariadb-client \
+		mysql-client \
 		libmysqlclient-dev \
 		unzip \
 		wget \

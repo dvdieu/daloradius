@@ -2,17 +2,30 @@ version: "3"
 
 services:
 
-  radius-mysql:
-    image: mariadb:10
-    container_name: radius-mysql
-    restart: unless-stopped
-    environment:
-      - MYSQL_DATABASE=radius
-      - MYSQL_USER=radius
-      - MYSQL_PASSWORD=radiusdbpw
-      - MYSQL_ROOT_PASSWORD=radiusrootdbpw
-    volumes:
-      - "./data/mysql:/var/lib/mysql"
+  mysql:
+      image: docker.io/bitnami/mysql:8.0
+      volumes:
+        - $PWD/conf.d/my.cnf:/opt/bitnami/mysql/conf/my_custom.cnf
+        - mysql-data:/bitnami/mysql/data
+        - /etc/localtime:/etc/localtime:ro
+      environment:
+        # ALLOW_EMPTY_PASSWORD is recommended only for development.
+        - MYSQL_AUTHENTICATION_PLUGIN=mysql_native_password
+        - MYSQL_REPLICATION_USER=repl_user_fws
+        - MYSQL_REPLICATION_PASSWORD=FWS@123
+        - TZ=Asia/Ho_Chi_Minh
+        - MYSQL_ROOT_PASSWORD=Flick123
+        - log-bin=mysql-bin
+        - binlog-format=ROW
+      restart: always
+      ports:
+        - '3306:3306'
+      healthcheck:
+        test: ['CMD', '/opt/bitnami/scripts/mysql/healthcheck.sh']
+        interval: 15s
+        timeout: 5s
+        retries: 6
+
 
   radius:
     container_name: radius
@@ -21,16 +34,16 @@ services:
       dockerfile: Dockerfile-freeradius
     restart: unless-stopped
     depends_on: 
-      - radius-mysql
+      - mysql
     ports:
       - '1812:1812/udp'
       - '1813:1813/udp'
     environment:
-      - MYSQL_HOST=radius-mysql
+      - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
       - MYSQL_DATABASE=radius
-      - MYSQL_USER=radius
-      - MYSQL_PASSWORD=radiusdbpw
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=Flick123
       # Optional settings
       - DEFAULT_CLIENT_SECRET=testing123
     volumes:
@@ -44,16 +57,16 @@ services:
     restart: unless-stopped
     depends_on:
       - radius
-      - radius-mysql
+      - mysql
     ports:
       - '80:80'
       - '8000:8000'
     environment:
-      - MYSQL_HOST=radius-mysql
+      - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
       - MYSQL_DATABASE=radius
-      - MYSQL_USER=radius
-      - MYSQL_PASSWORD=radiusdbpw
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=Flick123
       # Optional Settings:
       - DEFAULT_CLIENT_SECRET=testing123
       - DEFAULT_FREERADIUS_SERVER=radius
@@ -64,3 +77,11 @@ services:
 
     volumes:
       - ./data/daloradius:/data
+
+volumes:
+  mysql-data:
+    driver: local
+    driver_opts:
+      type: local
+      o: bind
+      device: ./data/mysql
